@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  # Servicio de Base de Datos MySQL
+  db:
+    image: mysql:8.0
+    container_name: mysql-db
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: springboot25
+      MYSQL_DATABASE: db-spring-boot-api
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - db_data:/var/lib/mysql
+
+  # Servicio de Keycloak
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.2 # Una version reciente y estable
+    container_name: keycloak-server
+    ports:
+      - "9090:8080"
+    environment:
+      # Configuracion de Administrador de Keycloak
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+
+      # Configuracion de la Base de Datos para Keycloak (Usando la misma imagen de MySQL)
+      #KC_DB: mysql
+      #KC_DB_URL: jdbc:mysql://db:3306/keycloak?useSSL=false
+      #KC_DB_USERNAME: root
+      #KC_DB_PASSWORD: springboot25
+      
+      # Configuracion Inicial del Realm
+      # Esto permite importar la configuracion desde el archivo keycloak-config.json
+      # KC_HOSTNAME_URL: http://localhost:9090
+      # KC_HOSTNAME_ADMIN_URL: http://localhost:9090
+    
+    command: start-dev
+    depends_on:
+      - db
+    
+    #volumes:
+      # Montar el archivo de configuracion inicial del Realm y usuarios/clientes
+      #- ./keycloak-config.json:/opt/keycloak/data/import/realm-import.json
+      
+volumes:
+  db_data:
+
